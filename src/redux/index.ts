@@ -1,14 +1,25 @@
-import {createStore, combineReducers} from 'redux'
-import Products from './Products/Products.reducer'
+import {
+    createStore,
+    combineReducers,
+    compose,
+    applyMiddleware
+  } from 'redux'
+  import thunk from 'redux-thunk'
+  import Products from './Products/Products.reducer'
 
-const reducers = combineReducers({
+  const reducers = combineReducers({
     products: Products
-})
-
-const store = createStore(
+  })
+  
+  const store = createStore(
     reducers,
-    //@ts-ignore
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
-)
-
-export default store
+    compose(
+      applyMiddleware(thunk),
+      // @ts-ignore
+      ...(window.__REDUX_DEVTOOLS_EXTENSION__ ? [window.__REDUX_DEVTOOLS_EXTENSION__()] : [])
+      //window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    )
+  )
+  
+  export default store
+  

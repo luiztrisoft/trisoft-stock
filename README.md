@@ -43,6 +43,8 @@ You can learn more in the [Create React App documentation](https://facebook.gith
 
 To learn React, check out the [React documentation](https://reactjs.org/).
 
+## Versões
+
 Refatorando o ProductsCRUD (Removendo o try catch)
 
 https://github.com/luiztrisoft/trisoft-stock/commit/da2d5bf5aca68974f0417b43acdf400c0acde4af

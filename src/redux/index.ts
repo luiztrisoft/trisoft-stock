@@ -8,7 +8,7 @@ import thunk, { ThunkAction } from 'redux-thunk'
 import Products from './Products/Products.reducer'
 import { persistReducer, persistStore } from 'redux-persist'
 import storage from 'redux-persist/lib/storage'
-import Authentication from '../../../../Authentication/Authentication.reducer'
+import Authentication from './Authentication/Authentication.reducer'
 
 const reducers = combineReducers({
   products: Products,
@@ -26,7 +26,8 @@ const store = createStore(
   compose(
     applyMiddleware(thunk),
     // @ts-ignore
-    window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
+    ...(window.__REDUX_DEVTOOLS_EXTENSION__ ? [window.__REDUX_DEVTOOLS_EXTENSION__()] : [])
+    //window.__REDUX_DEVTOOLS_EXTENSION__ && window.__REDUX_DEVTOOLS_EXTENSION__()
   )
 )
 

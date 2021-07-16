@@ -2,7 +2,7 @@ import React from 'react'
 import './Table.scss'
 import organizeData from '../../utils/organizedDataForTable'
 import Button from '../Button'
-import withPermission from '../../utils/HOC/withPermission'
+//import withPermission from '../../utils/HOC/withPermission'
 
 export interface TableHeader {
   key: string
@@ -102,4 +102,5 @@ const Table: React.FC<TableProps> = (props) => {
   </table>
 }
 
-export default withPermission(['customer', 'admin'])(Table)
+//export default withPermission(['customer', 'admin'])(Table)
+export default Table

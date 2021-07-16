@@ -10,10 +10,14 @@ declare interface Credentials {
 
 export const login =
   ({ user, pass }: Credentials): Thunk =>
-  async (dispatch) => {
-    const loggedInUser = await signInUser(user, pass)
-    dispatch({
-      type: 'AUTHENTICATION_LOGIN',
-      payload: loggedInUser
-    })
-  }
+    async (dispatch) => {
+      const loggedInUser = await signInUser(user, pass)
+      dispatch({
+        type: 'AUTHENTICATION_LOGIN',
+        payload: loggedInUser
+      })
+    }
+
+export const logout = () => ({
+  type: 'AUTHENTICATION_LOGOUT'
+})

@@ -2,8 +2,9 @@ import React from 'react'
 import './Table.scss'
 import organizeData from '../../utils/organizedDataForTable'
 import Button from '../Button'
-//import withPermission from '../../utils/HOC/withPermission'
-
+import { NavLink, useLocation } from 'react-router-dom'
+import { parse } from 'query-string'
+import paginate from '../../utils/paginate'
 export interface TableHeader {
   key: string
   value: string
@@ -14,93 +15,124 @@ declare interface TableProps {
   data: any[]
 
   enableActions?: boolean
-  
-  onDelete?: (item : any) => void
-  onDetail?: (item : any) => void
-  onEdit?: (item : any) => void
+
+  itemsPerPage?: number
+
+  onDelete?: (item: any) => void
+  onDetail?: (item: any) => void
+  onEdit?: (item: any) => void
 }
 
 const Table: React.FC<TableProps> = (props) => {
-  const [organizedData, indexedHeaders] = organizeData(props.data, props.headers)
+  const itemsPerPage = props.itemsPerPage || 5
 
-  return <table className="AppTable">
-    <thead>
-      <tr>
-        {
-          props.headers.map(header =>
-            <th
-              className={header.right ? 'right' : ''}
-              key={header.key}
-            >
-              {header.value}
-            </th>
-          )
-        }
-        {
-          props.enableActions
+  const location = useLocation()
+
+  const page = parseInt(
+    parse(location.search).page as string
+  ) || 1
+
+  const [organizedData, indexedHeaders] = organizeData(props.data, props.headers)
+  const paginatedData = paginate(organizedData, itemsPerPage, page);
+  const totalPages = Math.ceil(organizedData.length / itemsPerPage)
+  return <>
+    <table className="AppTable">
+      <thead>
+        <tr>
+          {
+            props.headers.map(header =>
+              <th
+                className={header.right ? 'right' : ''}
+                key={header.key}
+              >
+                {header.value}
+              </th>
+            )
+          }
+          {
+            props.enableActions
             && <th className="right">
               Actions
-            </th>
-        }
-      </tr>
-    </thead>
-    <tbody>
-      {
-        organizedData.map((row, i) => {
-          return <tr key={i}>
-            {
-              Object
-                .keys(row)
-                .map((item, i) =>
-                  item !== '$original'
-                    ? <td
+              </th>
+          }
+        </tr>
+      </thead>
+      <tbody>
+        {
+          paginatedData.map((row, i) => {
+            return <tr key={i}>
+              {
+                Object
+                  .keys(row)
+                  .map((item, i) =>
+                    item !== '$original'
+                      ? <td
                         key={row.$original._id + i}
                         className={indexedHeaders[item].right ? 'right' : ''}
                       >
-                        { row[item] }
+                        {row[item]}
                       </td>
-                    : null
-                )
-            }
+                      : null
+                  )
+              }
 
-            {
-              props.enableActions
+              {
+                props.enableActions
                 && <td className="actions right">
                   {
                     props.onEdit &&
-                      <Button
-                      // NOTA PARA MIM: A arrow function no onClick impede de executar na renderização a todo momento
-                        onClick={() => props.onEdit && props.onEdit(row.$original)}
-                      >
-                        Edit
-                      </Button>
+                    <Button
+                      onClick={() => props.onEdit && props.onEdit(row.$original)}
+                    >
+                      Edit
+                        </Button>
                   }
                   {
                     props.onDetail &&
-                      <Button
-                      // NOTA PARA MIM: A arrow function no onClick impede de executar na renderização a todo momento
-                        onClick={() => props.onDetail && props.onDetail(row.$original)}
-                      >
-                        Detail
-                      </Button>
+                    <Button
+                      onClick={() => props.onDetail && props.onDetail(row.$original)}
+                    >
+                      Detail
+                        </Button>
                   }
                   {
                     props.onDelete &&
-                      <Button
-                      // NOTA PARA MIM: A arrow function no onClick impede de executar na renderização a todo momento
-                        onClick={() => props.onDelete && props.onDelete(row.$original)}
-                      >
-                        Delete
-                      </Button>
+                    <Button
+                      onClick={() => props.onDelete && props.onDelete(row.$original)}
+                    >
+                      Delete
+                        </Button>
                   }
                 </td>
-            }
-          </tr>
-        })
+              }
+            </tr>
+          })
+        }
+      </tbody>
+    </table>
+    <div className="Table__pagination">
+      {
+        Array(totalPages)
+          .fill('')
+          .map((_, i) => {
+            return <NavLink
+              key={i}
+              activeClassName="selected"
+              to={{
+                pathname: location.pathname,
+                search: `?page=${i + 1}`
+              }}
+              isActive={() => page === i + 1}
+            >
+              {i + 1}
+            </NavLink>
+          })
       }
-    </tbody>
-  </table>
+    </div>
+  </>
 }
 
-//export default withPermission(['customer', 'admin'])(Table)
 export default Table
+
+
+//export default withPermission(['customer', 'admin'])(Table)

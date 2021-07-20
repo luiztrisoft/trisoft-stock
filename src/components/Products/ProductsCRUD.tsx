@@ -6,9 +6,9 @@ import Swal from 'sweetalert2'
 import { connect, useDispatch } from 'react-redux'
 import * as ProductsAction from '../../redux/Products/Products.actions'
 import { RootState, ThunkDispatch } from '../../redux'
+import { useHistory, useLocation, useParams } from 'react-router-dom'
 
 const headers: TableHeader[] = [
-  { key: 'id', value: '#' },
   { key: 'name', value: 'Product' },
   { key: 'price', value: 'Price', right: true },
   { key: 'stock', value: 'Available Stock', right: true }
@@ -20,34 +20,46 @@ declare interface ProductsCRUDProps {
 
 const ProductsCRUD: React.FC<ProductsCRUDProps> = (props) => {
   const dispatch: ThunkDispatch = useDispatch()
- 
-  const showErrorAlert = (err: Error) => Swal.fire('Oops', err.message, 'error')
+  const params = useParams<{ id?: string }>()
+  const history = useHistory()
+  const location = useLocation()
+  const showErrorAlert =
+    (err: Error) => Swal.fire('Oops!', err.message, 'error')
 
   const [updatingProduct, setUpdatingProduct] = useState<Product | undefined>(undefined)
   
   useEffect(() => {
-    fetchData()
-  }, [])
+    setUpdatingProduct(
+      params.id
+        ? props.products.find(product => product._id === params.id)
+        : undefined
+    )
+  }, [params, props.products])
 
+  useEffect(() => {
+    fetchData()
+    // eslint-disable-next-line
+  }, [])
+  
   async function fetchData() {
     dispatch(ProductsAction.getProducts())
       .catch(showErrorAlert)
   }
-  
+
   const handleProductSubmit = async (product: ProductCreator) => {
     dispatch(ProductsAction.insertNewProduct(product))
       .catch(showErrorAlert)
   }
 
-  const handleProductUpdate = async (newProduct: Product) => {    
-      dispatch(ProductsAction.updateProduct(newProduct))
-        .then(()=> setUpdatingProduct(undefined))
-        .catch(showErrorAlert)
+  const handleProductUpdate = async (newProduct: Product) => {
+    dispatch(ProductsAction.updateProduct(newProduct))
+      .then(() => setUpdatingProduct(undefined))
+      .catch(showErrorAlert)
   }
 
   const deleteProduct = async (id: string) => {
     dispatch(ProductsAction.deleteProduct(id))
-      .then(()=>{
+      .then(() => {
         Swal.fire('Uhul!', 'Product successfully deleted', 'success')
       })
       .catch(showErrorAlert)
@@ -64,7 +76,7 @@ const ProductsCRUD: React.FC<ProductsCRUDProps> = (props) => {
         cancelButtonColor: '#d33',
         confirmButtonText: `Yes, delete ${product.name}!`
       })
-      .then(({value}) => value && deleteProduct(product._id))      
+      .then(({ value }) => value && deleteProduct(product._id))
   }
 
   const handleProductDetail = (product: Product) => {
@@ -74,7 +86,7 @@ const ProductsCRUD: React.FC<ProductsCRUDProps> = (props) => {
       'info'
     )
   }
- 
+
   return <>
     <Table
       headers={headers}
@@ -82,7 +94,13 @@ const ProductsCRUD: React.FC<ProductsCRUDProps> = (props) => {
       enableActions
       onDelete={handleProductDelete}
       onDetail={handleProductDetail}
-      onEdit={setUpdatingProduct}
+      onEdit={product => {
+        history.push({
+          pathname: `/products/${product._id}`,
+          search: location.search
+        })
+      }}
+      itemsPerPage={3}
     />
 
     <ProductForm
